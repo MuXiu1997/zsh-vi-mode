@@ -1,0 +1,71 @@
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  analyze-src-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: jeffreytse/zsh-vi-mode
+          fetch-depth: 0
+      - name: Get latest tag
+        id: latest-tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+    outputs:
+      latest-tag: ${{ steps.latest-tag.outputs.tag }}
+
+  analyze-dst-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Get latest tag
+        id: latest-tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        with:
+          fallback: 'v0.0.0'
+    outputs:
+      latest-tag: ${{ steps.latest-tag.outputs.tag }}
+
+  patch:
+    runs-on: ubuntu-latest
+    needs: [ analyze-src-tags, analyze-dst-tags ]
+    if: needs.analyze-src-tags.outputs.latest-tag != needs.analyze-dst-tags.outputs.latest-tag
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - uses: actions/checkout@v2
+        with:
+          repository: jeffreytse/zsh-vi-mode
+          path: src
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+          path: dst
+      - uses: actions/checkout@v2
+        with:
+          ref: patch
+          path: patch
+      - name: Patch
+        run: |
+          chmod +x patch/zsh-vi-mode-patch
+          rm -rf src/.git
+          cp -af ./src/. ./dst/
+          patch/zsh-vi-mode-patch src/zsh-vi-mode.zsh > dst/zsh-vi-mode-patch.zsh
+          echo 'source ${0:h}/zsh-vi-mode-patch.zsh' >> dst/zsh-vi-mode.plugin.zsh
+      - name: Commit and push
+        uses: EndBug/add-and-commit@v7
+        with:
+          branch: main
+          cwd: dst
+          default_author: github_actions
+          message: patch ${{ needs.analyze-src-tags.outputs.latest-tag }}
+          pull: NO-PULL
+          push: true
+          tag: ${{ needs.analyze-src-tags.outputs.latest-tag }}
