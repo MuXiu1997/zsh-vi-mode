@@ -150,7 +150,7 @@ Clone `zsh-vi-mode` into your custom plugins repo
 
 ```shell
 git clone https://github.com/jeffreytse/zsh-vi-mode \
-  $ZSH/custom/plugins/zsh-vi-mode
+  $ZSH_CUSTOM/plugins/zsh-vi-mode
 ```
 Then load as a plugin in your `.zshrc`
 
@@ -176,6 +176,12 @@ For Homebrew users, you can install it through the following command
 brew install zsh-vi-mode
 ```
 
+Then source it in your `.zshrc` (or `.bashrc`)
+
+```shell
+source $(brew --prefix)/opt/zsh-vi-mode/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+```
+
 #### Arch Linux (AUR)
 
 For Arch Linux users, you can install it through the following command
@@ -195,6 +201,42 @@ Then source it in your `.zshrc` (or `.bashrc`)
 ```shell
 source /usr/share/zsh/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
 ```
+
+#### Nix
+
+For users of Nix, as of [e7e3480530b34a9fe8cb52963ec2cf66e6707e15](https://github.com/NixOS/nixpkgs/commit/e7e3480530b34a9fe8cb52963ec2cf66e6707e15) you can source the plugin through the following configuration
+
+```shell
+programs = {
+  zsh = {
+    interactiveShellInit = ''
+      source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+    '';
+  };
+};
+```
+  
+Or if you prefer `home-manager`:
+
+```shell
+home-manager.users.[your username] = { pkgs, ... }: {
+  programs = {
+    zsh = {
+      initExtra = ''
+        source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+      '';
+    };
+  };
+};
+```
+
+#### Using [Fig](https://fig.io)
+
+Fig adds apps, shortcuts, and autocomplete to your existing terminal.
+
+Install `zsh-vi-mode` in just one click.
+
+<a href="https://fig.io/plugins/other/zsh-vi-mode" target="_blank"><img src="https://fig.io/badges/install-with-fig.svg" /></a>
 
 #### Manually
 
@@ -289,6 +331,8 @@ option.
 - `sd"`   : Delete `"`
 - `sr"'`  : Change `"` to `'`
 
+Note that key sequences must be pressed in fairly quick succession to avoid a timeout. You may extend this timeout with the [`ZVM_KEYTIMEOUT` option](#readkey-engine).
+  
 #### How to select surround text object?
 
 - `vi"`   : Select the text object inside the quotes
