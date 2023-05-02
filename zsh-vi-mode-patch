@@ -45,6 +45,17 @@ def main():
         if 'CUTBUFFER' in function_body:
             patch(function_name, function_body)
 
+    # Fixed syntax highlighting for `zsh-syntax-highlighting`
+    # Ref: https://github.com/jeffreytse/zsh-vi-mode/pull/188
+    print(
+        '\n'.join([
+            'function zvm_after_init() {',
+            '  autoload add-zle-hook-widget',
+            '  add-zle-hook-widget zle-line-pre-redraw zvm_zle-line-pre-redraw',
+            '}',
+        ])
+    )
+
 
 if __name__ == '__main__':
     main()
